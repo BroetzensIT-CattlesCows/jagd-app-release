@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="de" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jagd-App – Bewegungsjagden planen, frei selbst betreibbar</title>
+<meta name="description" content="Werkzeug für Forstbetriebe und Jagdgemeinschaften: Strecke offline erfassen, Bewegungsjagden über die Saison planen, einladen, Zusagen sammeln. Mit GIS-Anbindung und lesender REST-Schnittstelle. Selbst betreiben oder gehostet.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Jagd-App – Bewegungsjagden planen, frei selbst betreibbar">
+<meta property="og:description" content="Drückjagden über die ganze Saison organisieren, Strecke im Funkloch erfassen. Frei selbst betreibbar mit Docker Compose oder gehostet von Broetzens IT.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23FF5F0F' stroke='%2310231A' stroke-width='3'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='17' text-anchor='middle' fill='%2310231A'%3E1%3C/text%3E%3C/svg%3E">
+<link rel="preload" href="fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.classList.replace('no-js','js')</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Jagd-App",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Docker, Web",
+  "description": "Werkzeug für Forstbetriebe und Jagdgemeinschaften: Strecke offline erfassen, Bewegungsjagden über die Saison planen, einladen, Zusagen sammeln, GIS-Anbindung und lesende REST-Schnittstelle.",
+  "isAccessibleForFree": true,
+  "codeRepository": "https://github.com/BroetzensIT-CattlesCows/jagd-app-release",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"},
+  "author": {"@type": "Organization", "name": "Broetzens IT Cattles & Cows", "address": {"@type": "PostalAddress", "addressLocality": "Kassel", "addressCountry": "DE"}}
+}
+</script>
+<style>
+/* Schriften liegen neben der Seite: keine Requests an Dritte (DSGVO). Lizenz: fonts/OFL.txt */
+@font-face{font-family:"Barlow";font-weight:400;font-style:normal;font-display:swap;src:url(fonts/barlow-400.woff2) format("woff2")}
+@font-face{font-family:"Barlow";font-weight:600;font-style:normal;font-display:swap;src:url(fonts/barlow-600.woff2) format("woff2")}
+@font-face{font-family:"Barlow Condensed";font-weight:700;font-style:normal;font-display:swap;src:url(fonts/barlow-condensed-700.woff2) format("woff2")}
+
+:root{
+  --paper:#EDF1EA;
+  --ink:#10231A;
+  --ink-2:#34473C;
+  --spruce:#1E4A36;
+  --signal:#FF5F0F;
+  --on-signal:#10231A;
+  --rule:#10231A;
+  --m-bg:#E1E8DC;
+  --m-contour:#B3C1AE;
+  --m-road:#FFFFFF;
+  --a0:rgba(30,74,54,.07);
+  --a1:rgba(30,74,54,.24);
+  --a2:rgba(79,122,58,.26);
+  --a3:rgba(138,154,59,.26);
+  --stand-bg:#FFFFFF;
+  --code-bg:#10231A;
+  --code-ink:#EDF1EA;
+  --grain-op:.07;
+  --grain-blend:multiply;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#0F1914;
+    --ink:#E6EDE6;
+    --ink-2:#B8C7BC;
+    --spruce:#7FB896;
+    --rule:#E6EDE6;
+    --m-bg:#15241B;
+    --m-contour:#2D4335;
+    --m-road:#2E4A3A;
+    --a0:rgba(127,184,150,.06);
+    --a1:rgba(127,184,150,.22);
+    --a2:rgba(160,200,110,.20);
+    --a3:rgba(210,200,110,.18);
+    --stand-bg:#0F1914;
+    --code-bg:#1D2F25;
+    --code-ink:#E6EDE6;
+    --grain-op:.05;
+    --grain-blend:screen;
+  }
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:76px}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Barlow",system-ui,sans-serif;font-size:1.125rem;line-height:1.55;
+  overflow-x:hidden;
+}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
+  opacity:var(--grain-op);mix-blend-mode:var(--grain-blend);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--signal);outline-offset:3px}
+h1,h2,h3,.cond{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;line-height:.95;letter-spacing:-.01em;margin:0}
+p{margin:0 0 1rem;max-width:34em}
+.wrap{max-width:1280px;margin:0 auto;padding:0 clamp(16px,4vw,48px)}
+.skip{position:absolute;left:-9999px;top:0;z-index:60;background:var(--signal);color:var(--on-signal);padding:.6rem 1rem;font-weight:600}
+.skip:focus{left:16px;top:8px}
+
+/* Kopfzeile */
+.bar{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:2px solid var(--rule)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:1rem}
+.mark{display:flex;align-items:center;gap:.55rem;text-decoration:none;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1.5rem}
+.mark-dot{width:26px;height:26px;border-radius:50%;background:var(--signal);border:2px solid var(--on-signal);display:grid;place-items:center;font-size:.95rem;color:var(--on-signal);line-height:1}
+.bar nav{display:flex;gap:1.25rem;font-weight:600;font-size:1rem}
+.bar nav a{text-decoration:none;padding:.25rem 0;border-bottom:2px solid transparent}
+.bar nav a:hover{border-color:var(--signal)}
+@media (max-width:560px){.bar nav a:not(.keep){display:none}}
+
+/* Knöpfe: harte Kante, harter Schatten, reagieren auf Druck */
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1.2rem;line-height:1;
+  padding:.85rem 1.2rem;text-decoration:none;color:var(--ink);background:var(--paper);
+  border:2px solid var(--rule);box-shadow:4px 4px 0 var(--rule);
+  transition:transform .12s ease,box-shadow .12s ease;
+}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--rule)}
+.btn:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--rule)}
+.btn-signal{background:var(--signal);color:var(--on-signal);border-color:var(--on-signal);box-shadow:4px 4px 0 var(--on-signal)}
+.btn-signal:hover{box-shadow:6px 6px 0 var(--on-signal)}
+@media (prefers-color-scheme: dark){.btn-signal{border-color:var(--ink);box-shadow:4px 4px 0 var(--ink)}.btn-signal:hover{box-shadow:6px 6px 0 var(--ink)}}
+
+/* Geschichte: Text scrollt, Karte bleibt stehen */
+.story{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);column-gap:clamp(24px,5vw,72px)}
+.hero{grid-column:1;grid-row:1;min-height:calc(100vh - 60px);display:flex;flex-direction:column;justify-content:center;padding:3rem 0}
+.hero h1{font-size:clamp(3rem,5.4vw,5.6rem);text-wrap:balance;margin-bottom:1.5rem}
+.lead{font-size:1.3rem;color:var(--ink-2)}
+.ctas{display:flex;flex-wrap:wrap;gap:1rem;margin:1.75rem 0 1.5rem}
+.audience{font-size:1rem;color:var(--ink-2);border-left:4px solid var(--signal);padding-left:.9rem}
+
+.step{grid-column:1;min-height:85vh;display:flex;flex-direction:column;justify-content:center;padding:3rem 0}
+.step:nth-of-type(1){grid-row:2}.step:nth-of-type(2){grid-row:3}.step:nth-of-type(3){grid-row:4}.step:nth-of-type(4){grid-row:5}
+.step-no{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:clamp(5rem,10vw,8.5rem);line-height:.8;color:transparent;-webkit-text-stroke:2px var(--ink);margin-bottom:.75rem;transition:color .4s ease}
+.step.is-active .step-no{color:var(--signal);-webkit-text-stroke-color:var(--on-signal)}
+.step h2{font-size:clamp(2.4rem,4.6vw,3.6rem);margin-bottom:1rem}
+.step ul{margin:0;padding:0;list-style:none;max-width:34em}
+.step li{padding:.35rem 0 .35rem 1.4rem;position:relative;border-top:1px solid color-mix(in srgb,var(--rule) 25%,transparent)}
+.step li::before{content:"";position:absolute;left:0;top:.95rem;width:.6rem;height:.6rem;background:var(--signal);border:2px solid var(--on-signal)}
+
+.stage{grid-column:2;grid-row:1 / span 5;position:sticky;top:60px;height:calc(100vh - 60px);display:flex;align-items:center;margin:0}
+.stage-inner{position:relative;width:100%}
+.map{display:block;width:100%;height:auto;max-height:calc(100vh - 150px)}
+.stage figcaption{font-size:.9rem;color:var(--ink-2);margin-top:.6rem}
+
+/* Kartenebenen */
+.m-bg{fill:var(--m-bg)}
+.m-contour path{fill:none;stroke:var(--m-contour);stroke-width:1.2}
+.m-area{fill:var(--a0);stroke:var(--ink);stroke-width:2;stroke-dasharray:7 5;stroke-linejoin:round;transition:fill .7s ease}
+.m-road{fill:none;stroke:var(--m-road);stroke-width:6;stroke-linecap:round}
+.m-label{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:22px;fill:var(--ink);text-anchor:middle;transition:opacity .5s ease}
+.m-meet{fill:var(--ink)}
+.m-meet-t{font-family:"Barlow",sans-serif;font-weight:600;font-size:13px;fill:var(--ink)}
+.m-frame{fill:none;stroke:var(--rule);stroke-width:2}
+.stand > g{transform-box:fill-box;transform-origin:center;transition:transform .45s cubic-bezier(.3,1.6,.5,1),opacity .3s ease;transition-delay:calc(var(--i) * 55ms)}
+.stand circle{fill:var(--signal);stroke:var(--on-signal);stroke-width:2;transition:fill .35s ease;transition-delay:calc(var(--i) * 70ms)}
+.stand text{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:14px;fill:var(--on-signal);text-anchor:middle}
+.stand.no circle{fill:var(--stand-bg);stroke:var(--ink);stroke-dasharray:3 3}
+.stand.no text{fill:var(--ink)}
+
+/* Ohne JS: alles sichtbar. Mit JS: Karte baut sich beim Scrollen auf */
+.js .m-label{opacity:0}
+.js.s1 .m-label{opacity:1}
+.js.s1 .a1{fill:var(--a1)}
+.js.s1 .a2{fill:var(--a2);transition-delay:.2s}
+.js.s1 .a3{fill:var(--a3);transition-delay:.4s}
+.js .stand > g{transform:scale(0);opacity:0}
+.js.s2 .stand > g{transform:scale(1);opacity:1}
+.js .stand circle{fill:var(--stand-bg);stroke:var(--ink)}
+.js .stand text{fill:var(--ink)}
+.js.s3 .stand.yes circle{fill:var(--signal);stroke:var(--on-signal)}
+.js.s3 .stand.yes text{fill:var(--on-signal)}
+.js .stand.no circle{stroke-dasharray:3 3}
+
+.badge,.layers{position:absolute;background:var(--paper);border:2px solid var(--rule);box-shadow:4px 4px 0 var(--rule);transition:opacity .4s ease,transform .4s ease}
+.badge{top:14px;right:14px;padding:.55rem .8rem;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1.25rem;line-height:1.05}
+.badge b{display:block;font-size:2.2rem;color:var(--ink)}
+.layers{left:14px;bottom:44px;padding:.7rem .9rem;font-size:.95rem;margin:0;list-style:none}
+.layers li{display:flex;align-items:center;gap:.5rem;line-height:1.7}
+.sw{width:14px;height:14px;border:2px solid var(--rule);flex:none}
+.sw-area{background:var(--a1)}.sw-stand{background:var(--signal);border-radius:50%}.sw-api{background:var(--ink)}
+.js .badge,.js .layers{opacity:0;transform:translateY(8px)}
+.js.s3 .badge{opacity:1;transform:none}
+.js.s4 .layers{opacity:1;transform:none}
+
+/* Schmale Bildschirme: Karte klebt oben, Text läuft darunter durch */
+@media (max-width:900px){
+  .story{grid-template-columns:minmax(0,1fr)}
+  .hero{min-height:auto;padding:3rem 0 2rem}
+  .stage{grid-column:1;grid-row:2;height:auto;top:60px;z-index:5;background:var(--paper);padding:.75rem 0 .5rem;border-bottom:2px solid var(--rule)}
+  .map{max-height:38vh}
+  .stage figcaption{display:none}
+  .badge{top:8px;right:8px;font-size:1rem;padding:.4rem .6rem}
+  .badge b{font-size:1.6rem}
+  .layers{left:8px;bottom:8px;font-size:.8rem;padding:.4rem .6rem}
+  .step{min-height:75vh;padding:2.5rem 0}
+  .step:nth-of-type(1){grid-row:3}.step:nth-of-type(2){grid-row:4}.step:nth-of-type(3){grid-row:5}.step:nth-of-type(4){grid-row:6}
+}
+/* Handy: Legende verdeckt sonst Stände, Badge kleiner */
+@media (max-width:560px){
+  .layers{display:none}
+  .badge{top:6px;right:6px;font-size:.8rem;padding:.25rem .45rem;box-shadow:2px 2px 0 var(--rule)}
+  .badge b{font-size:1.2rem}
+}
+
+/* Abschnitte nach der Geschichte */
+.sec{border-top:2px solid var(--rule);padding:clamp(4rem,9vw,7rem) 0}
+.kicker{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1.1rem;text-transform:uppercase;letter-spacing:.08em;color:var(--spruce);margin:0 0 .75rem}
+.sec h2{font-size:clamp(2.6rem,5vw,4.2rem);margin-bottom:1.25rem;max-width:16em;text-wrap:balance}
+.sec-lead{font-size:1.25rem;color:var(--ink-2);margin-bottom:2.5rem}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));border-top:2px solid var(--rule);border-left:2px solid var(--rule)}
+.cell{border-right:2px solid var(--rule);border-bottom:2px solid var(--rule);padding:1.5rem 1.4rem 1.2rem}
+.cell h3{font-size:1.9rem;margin-bottom:.6rem}
+.cell p{font-size:1.02rem;color:var(--ink-2);margin:0}
+.cell-tag{display:inline-block;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:.95rem;background:var(--signal);color:var(--on-signal);border:2px solid var(--on-signal);padding:.1rem .45rem;margin-bottom:.8rem}
+
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1.5rem;margin-top:3rem}
+.role{border-left:4px solid var(--signal);padding-left:1rem}
+.role h3{font-size:1.6rem;margin-bottom:.4rem}
+.role p{font-size:1rem;color:var(--ink-2);margin:0}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:2rem}
+.card{border:2px solid var(--rule);box-shadow:6px 6px 0 var(--rule);background:var(--paper);padding:clamp(1.25rem,3vw,2rem);display:flex;flex-direction:column}
+.card h3{font-size:2.2rem;margin-bottom:.75rem}
+.card .btn{align-self:flex-start;margin-top:auto}
+.card-signal{box-shadow:6px 6px 0 var(--signal)}
+.checks{list-style:none;margin:0 0 1.5rem;padding:0}
+.checks li{padding:.3rem 0 .3rem 1.7rem;position:relative}
+.checks li::before{content:"";position:absolute;left:.2rem;top:.6rem;width:.5rem;height:.85rem;border:solid var(--spruce);border-width:0 3px 3px 0;transform:rotate(45deg)}
+
+pre{margin:0 0 1.5rem;background:var(--code-bg);color:var(--code-ink);padding:1rem 1.15rem;overflow-x:auto;font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-size:.88rem;line-height:1.6;border:2px solid var(--rule)}
+pre .c{opacity:.6}
+code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-size:.9em}
+p code,li code,td code{background:color-mix(in srgb,var(--ink) 9%,transparent);padding:.05rem .3rem}
+
+.api{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(24px,5vw,72px);align-items:start}
+@media (max-width:900px){.api{grid-template-columns:minmax(0,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:1rem}
+th,td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid color-mix(in srgb,var(--rule) 30%,transparent);vertical-align:top}
+th{font-family:"Barlow Condensed",sans-serif;font-size:1.15rem;border-bottom:2px solid var(--rule)}
+
+.formats{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1rem;padding:0;list-style:none}
+.formats li{border:2px solid var(--rule);padding:.15rem .55rem;font-weight:600;font-size:.95rem}
+
+.cta{background:var(--spruce);color:var(--paper)}
+.cta .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2rem}
+.cta h2{font-size:clamp(2.4rem,5vw,4rem);max-width:14em;margin:0}
+.cta .btn{background:var(--paper);color:var(--ink);border-color:var(--paper);box-shadow:4px 4px 0 var(--signal)}
+.cta .btn:hover{box-shadow:6px 6px 0 var(--signal)}
+.cta .btn-signal{background:var(--signal);color:var(--on-signal);border-color:var(--on-signal);box-shadow:4px 4px 0 var(--on-signal)}
+@media (prefers-color-scheme: dark){.cta{background:#1D2F25;color:var(--ink)}}
+
+footer{border-top:2px solid var(--rule);padding:2.5rem 0 3rem;font-size:.95rem;color:var(--ink-2)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:1.5rem 3rem;justify-content:space-between}
+footer p{margin:0 0 .4rem}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#inhalt">Zum Inhalt springen</a>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="mark" href="#top" aria-label="Jagd-App, zum Seitenanfang"><span class="mark-dot" aria-hidden="true">1</span>Jagd-App</a>
+    <nav aria-label="Hauptnavigation">
+      <a href="#ablauf">Ablauf</a>
+      <a href="#funktionen">Funktionen</a>
+      <a href="#betrieb">Betrieb</a>
+      <a href="#schnittstelle">Schnittstelle</a>
+      <a class="keep" href="https://github.com/BroetzensIT-CattlesCows/jagd-app-release">Releases</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inhalt">
+  <div class="wrap story" id="top">
+    <header class="hero">
+      <h1>Bewegungsjagden planen. Die ganze Saison. Frei selbst betreibbar.</h1>
+      <p class="lead">Die Jagd-App bringt Revierdaten, Einladungen, Zusagen und Strecke an einen Ort. Läuft im Browser, auf dem Handy auch im Funkloch. Sie betreiben die App selbst oder lassen sie hosten.</p>
+      <div class="ctas">
+        <a class="btn btn-signal" href="https://github.com/BroetzensIT-CattlesCows/jagd-app-release">Releases auf GitHub</a>
+        <a class="btn" href="#betrieb">Selbst betreiben</a>
+      </div>
+      <p class="audience">Für Forstbetriebe, Jagdgemeinschaften und Revierleitungen.<br>Gäste brauchen kein Konto und kein Passwort.</p>
+    </header>
+
+    <section class="step" id="ablauf" data-step="1" aria-labelledby="s1h">
+      <div class="step-no" aria-hidden="true">1</div>
+      <h2 id="s1h">Reviere kommen aus dem GIS.</h2>
+      <p>Jagdbezirke, Einrichtungen, Sammelplätze und Rettungspunkte übernimmt die App aus Ihrem GIS, per Datei oder Dienst. Der Abgleich läuft nachts von selbst.</p>
+      <ul>
+        <li>Shapefile, GeoPackage, GeoJSON, KML, GPX, CSV, DXF, File-Geodatabase</li>
+        <li>WFS, OGC API Features, ArcGIS FeatureServer</li>
+        <li>Sicherheitsbremse: Fehlen plötzlich mehr als 10&nbsp;% der Objekte, hält der Lauf an und wartet auf Freigabe</li>
+      </ul>
+    </section>
+
+    <section class="step" data-step="2" aria-labelledby="s2h">
+      <div class="step-no" aria-hidden="true">2</div>
+      <h2 id="s2h">Stände setzen, Jagd planen.</h2>
+      <p>Jagd anlegen oder die Vorjahresjagd mit einem Klick kopieren. Stände, Treffpunkt, Texte und Gästeliste sind sofort wieder da.</p>
+      <ul>
+        <li>Treiben, Zeitplan, Freigabe je Wildart, Hundebeitrag</li>
+        <li>Stände ohne gültige UVV-Kontrolle lassen sich nicht besetzen</li>
+        <li>Auch auf Gastrevieren, auf denen Ihr Betrieb mitjagt</li>
+      </ul>
+    </section>
+
+    <section class="step" data-step="3" aria-labelledby="s3h">
+      <div class="step-no" aria-hidden="true">3</div>
+      <h2 id="s3h">Einladen. Zusagen sammeln.</h2>
+      <p>Eine Einladung für die ganze Saison, im Erscheinungsbild Ihres Betriebs. Gäste antworten über einen persönlichen Link, je Termin.</p>
+      <ul>
+        <li>Zu- oder Absage, Hunde, Fahrgemeinschaften</li>
+        <li>Sicherheitsregeln werden vor der Zusage bestätigt</li>
+        <li>Erinnerung vor der Frist, Standzettel und Gruppenkarten als PDF</li>
+      </ul>
+    </section>
+
+    <section class="step" data-step="4" aria-labelledby="s4h">
+      <div class="step-no" aria-hidden="true">4</div>
+      <h2 id="s4h">Strecke erfassen. Daten rausgeben.</h2>
+      <p>Erlegungen werden am Stand erfasst, auch ohne Netz. Die Revierleitung prüft sie, die Auswertung ist sofort fertig. Andere Systeme lesen über eine dokumentierte Schnittstelle mit.</p>
+      <ul>
+        <li>Offline erfassen, später automatisch übertragen</li>
+        <li>Strecke je Wildart, Bezirk und Hochsitz, Abgleich mit dem Abschussplan</li>
+        <li>REST-Schnittstelle mit OpenAPI-Beschreibung, z.&nbsp;B. für n8n</li>
+      </ul>
+    </section>
+
+    <figure class="stage" aria-label="Schematische Revierkarte, die sich beim Scrollen aufbaut">
+      <div class="stage-inner">
+        <svg class="map" viewBox="0 0 600 520" role="img" aria-labelledby="mapt">
+          <title id="mapt">Drei Jagdbezirke mit zwölf Drückjagdständen; neun Stände haben zugesagt, drei sind offen.</title>
+          <rect class="m-bg" width="600" height="520"/>
+          <g class="m-contour">
+            <path d="M-10,90 C80,60 160,110 250,80 S420,40 610,70"/>
+            <path d="M-10,180 C90,150 170,210 280,170 S470,120 610,160"/>
+            <path d="M-10,320 C110,290 200,350 320,310 S500,270 610,300"/>
+            <path d="M-10,410 C100,380 230,440 340,400 S520,360 610,390"/>
+            <path d="M120,470 C200,440 260,500 360,470 S480,440 560,480"/>
+            <path d="M380,230 C420,200 500,215 520,250 S470,300 420,285 S350,260 380,230 Z"/>
+          </g>
+          <path class="m-road" d="M-10,300 C150,280 250,330 610,262"/>
+          <path class="m-road" d="M330,-10 C318,150 360,300 300,530"/>
+          <path class="m-area a1" d="M40,60 L260,40 L300,150 L250,260 L60,240 Z"/>
+          <path class="m-area a2" d="M300,150 L260,40 L520,50 L560,200 L420,250 Z"/>
+          <path class="m-area a3" d="M60,240 L250,260 L300,150 L420,250 L560,200 L540,470 L80,480 Z"/>
+          <text class="m-label" x="152" y="162">Steinberg</text>
+          <text class="m-label" x="418" y="158">Rohrbach</text>
+          <text class="m-label" x="330" y="462">Kaufunger Wald</text>
+          <g>
+            <rect class="m-meet" x="318" y="282" width="14" height="14" transform="rotate(45 325 289)"/>
+            <text class="m-meet-t" x="342" y="294">Treffpunkt</text>
+          </g>
+          <g class="stand yes" style="--i:0"><g><circle cx="105" cy="118" r="15"/><text x="105" y="123">1</text></g></g>
+          <g class="stand yes" style="--i:1"><g><circle cx="196" cy="92" r="15"/><text x="196" y="97">2</text></g></g>
+          <g class="stand no"  style="--i:2"><g><circle cx="214" cy="205" r="15"/><text x="214" y="210">3</text></g></g>
+          <g class="stand yes" style="--i:3"><g><circle cx="112" cy="204" r="15"/><text x="112" y="209">4</text></g></g>
+          <g class="stand yes" style="--i:4"><g><circle cx="352" cy="100" r="15"/><text x="352" y="105">5</text></g></g>
+          <g class="stand yes" style="--i:5"><g><circle cx="458" cy="96" r="15"/><text x="458" y="101">6</text></g></g>
+          <g class="stand no"  style="--i:6"><g><circle cx="490" cy="196" r="15"/><text x="490" y="201">7</text></g></g>
+          <g class="stand yes" style="--i:7"><g><circle cx="388" cy="206" r="15"/><text x="388" y="211">8</text></g></g>
+          <g class="stand yes" style="--i:8"><g><circle cx="160" cy="352" r="15"/><text x="160" y="357">9</text></g></g>
+          <g class="stand yes" style="--i:9"><g><circle cx="262" cy="392" r="15"/><text x="262" y="397">10</text></g></g>
+          <g class="stand no"  style="--i:10"><g><circle cx="430" cy="348" r="15"/><text x="430" y="353">11</text></g></g>
+          <g class="stand yes" style="--i:11"><g><circle cx="488" cy="420" r="15"/><text x="488" y="425">12</text></g></g>
+          <rect class="m-frame" x="1" y="1" width="598" height="518"/>
+        </svg>
+        <div class="badge" aria-hidden="true">Zusagen<b>9 / 12</b></div>
+        <ul class="layers" aria-hidden="true">
+          <li><span class="sw sw-area"></span>Bezirke aus dem GIS</li>
+          <li><span class="sw sw-stand"></span>Stände mit Zusage</li>
+          <li><span class="sw sw-api"></span>lesbar per REST</li>
+        </ul>
+        <figcaption>Schema, keine echten Revierdaten. Die App zeigt amtliche Karten und Luftbilder.</figcaption>
+      </div>
+    </figure>
+  </div>
+
+  <section class="sec" id="funktionen" aria-labelledby="fh">
+    <div class="wrap">
+      <p class="kicker">Funktionen</p>
+      <h2 id="fh">Vom Anschuss bis zur Strecke.</h2>
+      <p class="sec-lead">Papier, Excel-Listen und Rundmails werden überflüssig. Alle Oberflächentexte sind Deutsch, die App läuft auf Rechner, Tablet und Handy und lässt sich auf den Startbildschirm legen.</p>
+      <div class="grid">
+        <div class="cell"><span class="cell-tag">Offline</span><h3>Streckenbuch digital</h3><p>Erfassen am Handy mit Standort, Wildart, Gewicht und Foto. Pflichtangaben werden geprüft, etwa die Trichinenprobe bei Schwarzwild.</p></div>
+        <div class="cell"><h3>Wildbegleitscheine</h3><p>Geprüfte Stücke auswählen, Schein als PDF ausstellen. Fortlaufend nummeriert, nach dem Ausstellen unveränderbar, Korrekturen nur über Storno.</p></div>
+        <div class="cell"><h3>Saison-Einladung</h3><p>Mehrere Jagden in einer Einladung, Rückmeldung je Termin, Übersicht mit Zusagen und Hunden. Anfahrtskarte und Merkblätter hängen an.</p></div>
+        <div class="cell"><h3>Anfahrt &amp; Notfall</h3><p>Treffpunkt, Zufahrt und Rettungspunkte auf der Karte. Notfallnummern auf jedem Dokument, auf dem Handy direkt anrufbar.</p></div>
+        <div class="cell"><h3>Auswertung je Hochsitz</h3><p>Strecke je Einrichtung auf der Karte, Abgleich mit dem Abschussplan, CSV- und PDF-Export für die Meldung.</p></div>
+        <div class="cell"><span class="cell-tag">Push</span><h3>Nachrichten</h3><p>Hinweise an Gäste und Teams mit Lesebestätigung. Ungelesenes wird per E-Mail nachgefasst, Sicherheitsregeln brauchen eine Bestätigung.</p></div>
+        <div class="cell"><h3>UVV-Kontrollen</h3><p>Jährliche Kontrolle jeder Einrichtung als Aufgabe am Handy, mit Fotos und Mängeln. Gesperrte Stände fallen aus der Jagdplanung.</p></div>
+        <div class="cell"><h3>Personen &amp; Adressbücher</h3><p>Personen aus CSV, vCard oder einem CardDAV-Adressbuch (Nextcloud, Synology, iCloud). Ein erneuter Abgleich legt keine Doppelten an.</p></div>
+        <div class="cell"><h3>Ihr Erscheinungsbild</h3><p>Logo, Farben und Briefkopf des Betriebs in App, E-Mails und allen PDFs. Die App prüft die Kontraste für hell, dunkel und Dämmerung.</p></div>
+      </div>
+
+      <div class="roles">
+        <div class="role"><h3>Zentrale</h3><p>Bezirke, Personen und Rollen pflegen, Revierdaten anbinden, Strecke und Abschussplan auswerten.</p></div>
+        <div class="role"><h3>Revierleitung</h3><p>Jagden planen und einladen, Erlegungen prüfen, Wildbegleitscheine ausstellen.</p></div>
+        <div class="role"><h3>Jägerinnen und Jäger</h3><p>Erlegungen am Handy erfassen, auch offline. Eigene Strecke und Prüfstatus im Blick.</p></div>
+        <div class="role"><h3>Jagdgäste</h3><p>Kein Konto, kein Passwort. Ein persönlicher Link führt zu Einladung, Unterlagen und Rückmeldung.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="betrieb" aria-labelledby="bh">
+    <div class="wrap">
+      <p class="kicker">Betrieb</p>
+      <h2 id="bh">Selbst betreiben oder hosten lassen.</h2>
+      <p class="sec-lead">Derselbe Code in beiden Fällen. Die Daten jedes Betriebs sind per Zeilensicherheit in der Datenbank streng getrennt, jede Rolle sieht nur, was sie braucht.</p>
+      <div class="two">
+        <article class="card">
+          <h3>Selbst betreiben</h3>
+          <p>Ein Server mit Docker genügt. Der Stack bringt PostgreSQL mit PostGIS, die API, die Weboberfläche und einen Mail-Abfänger für Tests mit.</p>
+<pre><code><span class="c"># Betriebspaket holen und Zugangsdaten setzen</span>
+curl -LO https://github.com/BroetzensIT-CattlesCows/jagd-app-release/releases/latest/download/jagd-app.tar.gz
+tar xzf jagd-app.tar.gz &amp;&amp; cd jagd-app-*
+cp .env.example .env
+openssl rand -base64 48   <span class="c"># als SESSION_SECRET eintragen</span>
+
+<span class="c"># starten</span>
+docker network create docker-apps_proxy
+docker compose up -d
+
+<span class="c"># optional: Demo-Betrieb einspielen</span>
+docker compose exec api npm run seed:demo</code></pre>
+          <ul class="checks">
+            <li>Anmeldung per E-Mail-Link, kein Passwort</li>
+            <li>Eigener Mailserver über SMTP</li>
+            <li>Hinter jedem Reverse-Proxy, Anleitung für Nginx Proxy Manager im README</li>
+          </ul>
+          <a class="btn" href="https://github.com/BroetzensIT-CattlesCows/jagd-app-release/blob/main/docs/release-und-update.md">Anleitung für Betrieb und Update</a>
+        </article>
+        <article class="card card-signal">
+          <h3>Gehostet</h3>
+          <p>Broetzens IT aus Kassel betreibt die App für Ihren Betrieb: Einrichtung, Updates, Sicherungen und Mailversand inklusive.</p>
+          <ul class="checks">
+            <li>Übernahme Ihrer Revierdaten aus dem GIS</li>
+            <li>Personen aus CSV oder Adressbuch</li>
+            <li>Ihr Logo und Ihre Farben ab dem ersten Tag</li>
+            <li>Live-Vorführung mit Ihren eigenen Revierdaten</li>
+          </ul>
+          <a class="btn btn-signal" href="mailto:hallo@broetzens.de?subject=Jagd-App%20Vorf%C3%BChrung">Vorführung anfragen</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="schnittstelle" aria-labelledby="ah">
+    <div class="wrap api">
+      <div>
+        <p class="kicker">Schnittstelle</p>
+        <h2 id="ah">Ihre Daten bleiben Ihre Daten.</h2>
+        <p>Externe Systeme lesen Strecke, Jagden, Abschussplan, Auswertung und Stammdaten mit einem Token. Die Schnittstelle kann nichts ändern. Namen und genaue Koordinaten gibt sie nur heraus, wenn das Token das ausdrücklich darf.</p>
+        <p>Rein kommen die Daten über offene Formate:</p>
+        <ul class="formats">
+          <li>Shapefile</li><li>GeoPackage</li><li>GeoJSON</li><li>KML</li><li>GPX</li><li>CSV</li><li>WFS</li><li>OGC API</li><li>ArcGIS</li><li>vCard</li><li>CardDAV</li>
+        </ul>
+        <a class="btn" href="https://github.com/BroetzensIT-CattlesCows/jagd-app-release/blob/main/docs/integration/README.md">Doku mit n8n-Beispiel</a>
+      </div>
+      <div>
+<pre><code><span class="c"># Erlegungen des Betriebs lesen</span>
+curl -H "Authorization: Bearer $TOKEN" \
+  https://ihre-adresse.de/api/integration/v1/erlegungen</code></pre>
+        <table>
+          <thead><tr><th>Zugriffsbereich</th><th>liefert</th></tr></thead>
+          <tbody>
+            <tr><td><code>strecke</code></td><td>Erlegungen</td></tr>
+            <tr><td><code>jagden</code></td><td>Jagden mit Datum, Treiben, Teilnehmerzahlen</td></tr>
+            <tr><td><code>abschussplan</code></td><td>Soll je Bezirk</td></tr>
+            <tr><td><code>auswertung</code></td><td>Streckenliste mit Soll und Ist</td></tr>
+            <tr><td><code>stammdaten</code></td><td>Wildarten, Bezirke, Einrichtungen</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec cta" aria-labelledby="ch">
+    <div class="wrap">
+      <h2 id="ch">Die nächste Drückjagd ohne Zettelwirtschaft.</h2>
+      <div class="ctas">
+        <a class="btn btn-signal" href="https://github.com/BroetzensIT-CattlesCows/jagd-app-release">Zu den Releases</a>
+        <a class="btn" href="mailto:hallo@broetzens.de?subject=Jagd-App%20Vorf%C3%BChrung">Vorführung anfragen</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <p><strong>Jagd-App</strong> · ein Projekt von Broetzens IT Cattles &amp; Cows, Kassel</p>
+      <p>Diese Seite lädt nichts von Dritten: keine Cookies, keine Analyse, Schriften liegen auf dem Server.</p>
+    </div>
+    <div>
+      <p><a href="https://github.com/BroetzensIT-CattlesCows/jagd-app-release">Releases</a> · <a href="https://github.com/BroetzensIT-CattlesCows/jagd-app-release/issues">Fehler melden</a></p>
+      <p><a href="https://broetzens.de/impressum">Impressum</a> · <a href="https://broetzens.de/datenschutz">Datenschutz</a> · <a href="https://broetzens.de/agb">AGB</a></p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var steps=[].slice.call(document.querySelectorAll('.step'));
+  if(!('IntersectionObserver' in window)){root.classList.add('s1','s2','s3','s4');return}
+  function setStage(n){
+    for(var i=1;i<=4;i++)root.classList.toggle('s'+i,i<=n);
+    steps.forEach(function(s){s.classList.toggle('is-active',+s.dataset.step===n)});
+  }
+  var visible={};
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){visible[e.target.dataset.step]=e.isIntersecting});
+    var active=0;
+    steps.forEach(function(s){if(visible[s.dataset.step])active=Math.max(active,+s.dataset.step)});
+    // Nach der Geschichte bleibt die Karte vollständig
+    if(!active&&steps.length&&steps[steps.length-1].getBoundingClientRect().bottom<0)active=4;
+    setStage(active);
+  },{rootMargin:'-45% 0px -45% 0px'});
+  steps.forEach(function(s){io.observe(s)});
+})();
+</script>
+</body>
+</html>
