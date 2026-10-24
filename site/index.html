@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jagd-App – Bewegungsjagden planen, frei selbst betreibbar</title>
-<meta name="description" content="Werkzeug für Forstbetriebe und Jagdgemeinschaften: Strecke offline erfassen, Bewegungsjagden über die Saison planen, einladen, Zusagen sammeln. Mit GIS-Anbindung und lesender REST-Schnittstelle. Selbst betreiben oder gehostet.">
+<meta name="description" content="Werkzeug für Forstbetriebe und Jagdgemeinschaften: Revierdaten aus dem GIS, Bewegungsjagden über die Saison planen, einladen mit Kalendereintrag, Zusagen sammeln, Strecke offline erfassen, Wildbegleitscheine, Karten für den Jagdtag. Mit lesender REST-Schnittstelle. Selbst betreibbar oder gehostet.">
 <meta name="color-scheme" content="light dark">
 <meta property="og:title" content="Jagd-App – Bewegungsjagden planen, frei selbst betreibbar">
 <meta property="og:description" content="Drückjagden über die ganze Saison organisieren, Strecke im Funkloch erfassen. Frei selbst betreibbar mit Docker Compose oder gehostet von Broetzens IT.">
@@ -20,7 +20,7 @@
   "name": "Jagd-App",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Docker, Web",
-  "description": "Werkzeug für Forstbetriebe und Jagdgemeinschaften: Strecke offline erfassen, Bewegungsjagden über die Saison planen, einladen, Zusagen sammeln, GIS-Anbindung und lesende REST-Schnittstelle.",
+  "description": "Werkzeug für Forstbetriebe und Jagdgemeinschaften: Revierdaten aus dem GIS, Bewegungsjagden über die Saison planen, einladen mit Kalendereintrag, Zusagen sammeln, Strecke offline erfassen, Wildbegleitscheine, Karten für den Jagdtag und lesende REST-Schnittstelle.",
   "isAccessibleForFree": true,
   "codeRepository": "https://github.com/BroetzensIT-CattlesCows/jagd-app-release",
   "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"},
@@ -295,6 +295,7 @@ footer p{margin:0 0 .4rem}
       <ul>
         <li>Shapefile, GeoPackage, GeoJSON, KML, GPX, CSV, DXF, File-Geodatabase</li>
         <li>WFS, OGC API Features, ArcGIS FeatureServer</li>
+        <li>Rettungspunkte der KWF bundesweit mit einem Klick vorbelegt, auf Wunsch nur im Gebiet Ihrer Bezirke</li>
         <li>Sicherheitsbremse: Fehlen plötzlich mehr als 10&nbsp;% der Objekte, hält der Lauf an und wartet auf Freigabe</li>
       </ul>
     </section>
@@ -305,7 +306,8 @@ footer p{margin:0 0 .4rem}
       <p>Jagd anlegen oder die Vorjahresjagd mit einem Klick kopieren. Stände, Treffpunkt, Texte und Gästeliste sind sofort wieder da.</p>
       <ul>
         <li>Treiben, Zeitplan, Freigabe je Wildart, Hundebeitrag</li>
-        <li>Stände ohne gültige UVV-Kontrolle lassen sich nicht besetzen</li>
+        <li>Schützen-, Treiber- und Nachsuchegruppen mit Gruppenführer. Nach einer UVV-Kontrolle gesperrte Stände lassen sich nicht besetzen</li>
+        <li>Rettungspunkte aus dem Bestand übernehmen, auf Wunsch alle bis 3&nbsp;km um den Bezirk</li>
         <li>Auch auf Gastrevieren, auf denen Ihr Betrieb mitjagt</li>
       </ul>
     </section>
@@ -317,6 +319,7 @@ footer p{margin:0 0 .4rem}
       <ul>
         <li>Zu- oder Absage, Hunde, Fahrgemeinschaften</li>
         <li>Sicherheitsregeln werden vor der Zusage bestätigt</li>
+        <li>Kalendereintrag (.ics) an jeder Einladung, mit Erinnerung am Vortag. Verschiebung und Absage kommen als Änderungsmail</li>
         <li>Erinnerung vor der Frist, Standzettel und Gruppenkarten als PDF</li>
       </ul>
     </section>
@@ -328,6 +331,7 @@ footer p{margin:0 0 .4rem}
       <ul>
         <li>Offline erfassen, später automatisch übertragen</li>
         <li>Strecke je Wildart, Bezirk und Hochsitz, Abgleich mit dem Abschussplan</li>
+        <li>Am Jagdtag: Anwesenheit am Sammelplatz, Sichtungen und Strecke live im Dashboard</li>
         <li>REST-Schnittstelle mit OpenAPI-Beschreibung, z.&nbsp;B. für n8n</li>
       </ul>
     </section>
@@ -386,24 +390,30 @@ footer p{margin:0 0 .4rem}
     <div class="wrap">
       <p class="kicker">Funktionen</p>
       <h2 id="fh">Vom Anschuss bis zur Strecke.</h2>
-      <p class="sec-lead">Papier, Excel-Listen und Rundmails werden überflüssig. Alle Oberflächentexte sind Deutsch, die App läuft auf Rechner, Tablet und Handy und lässt sich auf den Startbildschirm legen.</p>
+      <p class="sec-lead">Papier, Excel-Listen und Rundmails werden überflüssig. Alle Oberflächentexte sind Deutsch, die App läuft auf Rechner, Tablet und Handy, lässt sich auf den Startbildschirm legen und hat einen Dämmerungsmodus für wenig Licht.</p>
       <div class="grid">
-        <div class="cell"><span class="cell-tag">Offline</span><h3>Streckenbuch digital</h3><p>Erfassen am Handy mit Standort, Wildart, Gewicht und Foto. Pflichtangaben werden geprüft, etwa die Trichinenprobe bei Schwarzwild.</p></div>
-        <div class="cell"><h3>Wildbegleitscheine</h3><p>Geprüfte Stücke auswählen, Schein als PDF ausstellen. Fortlaufend nummeriert, nach dem Ausstellen unveränderbar, Korrekturen nur über Storno.</p></div>
-        <div class="cell"><h3>Saison-Einladung</h3><p>Mehrere Jagden in einer Einladung, Rückmeldung je Termin, Übersicht mit Zusagen und Hunden. Anfahrtskarte und Merkblätter hängen an.</p></div>
-        <div class="cell"><h3>Anfahrt &amp; Notfall</h3><p>Treffpunkt, Zufahrt und Rettungspunkte auf der Karte. Notfallnummern auf jedem Dokument, auf dem Handy direkt anrufbar.</p></div>
-        <div class="cell"><h3>Auswertung je Hochsitz</h3><p>Strecke je Einrichtung auf der Karte, Abgleich mit dem Abschussplan, CSV- und PDF-Export für die Meldung.</p></div>
-        <div class="cell"><span class="cell-tag">Push</span><h3>Nachrichten</h3><p>Hinweise an Gäste und Teams mit Lesebestätigung. Ungelesenes wird per E-Mail nachgefasst, Sicherheitsregeln brauchen eine Bestätigung.</p></div>
-        <div class="cell"><h3>UVV-Kontrollen</h3><p>Jährliche Kontrolle jeder Einrichtung als Aufgabe am Handy, mit Fotos und Mängeln. Gesperrte Stände fallen aus der Jagdplanung.</p></div>
-        <div class="cell"><h3>Personen &amp; Adressbücher</h3><p>Personen aus CSV, vCard oder einem CardDAV-Adressbuch (Nextcloud, Synology, iCloud). Ein erneuter Abgleich legt keine Doppelten an.</p></div>
-        <div class="cell"><h3>Ihr Erscheinungsbild</h3><p>Logo, Farben und Briefkopf des Betriebs in App, E-Mails und allen PDFs. Die App prüft die Kontraste für hell, dunkel und Dämmerung.</p></div>
+        <div class="cell"><span class="cell-tag">Offline</span><h3>Streckenbuch digital</h3><p>Erfassen am Handy mit Standort, Wildart, Gewicht und Foto, auch Fall- und Unfallwild. Pflichtangaben werden geprüft, etwa die Trichinenprobe bei Schwarzwild. Gespeichert wird auf dem Gerät, übertragen später automatisch.</p></div>
+        <div class="cell"><h3>Wildbegleitscheine</h3><p>Geprüfte Stücke auswählen, Schein als PDF ausstellen. Fortlaufend nummeriert, in der App nach dem Ausstellen nicht änderbar, Korrekturen nur über Storno. Wildhändler stehen im Adressbuch.</p></div>
+        <div class="cell"><h3>Saison-Einladung</h3><p>Mehrere Jagden in einer Einladung, Rückmeldung je Termin, Übersicht mit Zusagen und Hunden als Tabelle und CSV. Anfahrtskarte und Merkblätter hängen an, ebenso ein Kalendereintrag zum Übernehmen in Apple, Google oder Outlook.</p></div>
+        <div class="cell"><h3>Jagdtag live</h3><p>Anwesenheit am Sammelplatz, Checkliste mit Jagdschein, Schießnachweis und Belehrung, Strecke und Gruppen im Dashboard. Sichtungen mit Richtung melden, Erlegungen für Teilnehmer nachmelden.</p></div>
+        <div class="cell"><span class="cell-tag">Neu</span><h3>Rettungspunkte der KWF</h3><p>Die bundesweiten Rettungspunkte der KWF lassen sich mit einem Klick als Quelle einrichten, auf Wunsch nur für das Gebiet Ihrer Bezirke. Je Jagd übernehmen Sie einzelne Punkte oder alle bis 3&nbsp;km.</p></div>
+        <div class="cell"><h3>Anfahrt &amp; Notfall</h3><p>Treffpunkt, Zufahrt und Rettungspunkte auf der Karte. Notfallnummern auf jedem Dokument, auf dem Handy direkt anrufbar. Der nächste Rettungspunkt steht auf dem Standzettel.</p></div>
+        <div class="cell"><span class="cell-tag">Offline</span><h3>Karten für den Jagdtag</h3><p>Topo- und Luftbildkarten, Wege, Gewässer, Schutzgebiete und eigene Ebenen aus Ihren Dateien oder per WMS. Für den Jagdtag oder das ganze Revier auf dem Handy speichern, damit die Karte im Funkloch da ist.</p></div>
+        <div class="cell"><h3>Gastreviere</h3><p>Fremde Flächen, auf denen Ihr Betrieb mitjagt, legen Sie als Gastrevier an: mit Grenze, Ständen und getrennten Summen in der Auswertung.</p></div>
+        <div class="cell"><h3>Auswertung je Hochsitz</h3><p>Strecke je Einrichtung auf der Karte, Abgleich mit dem Abschussplan, Abschussplan pflegen und vom Vorjahr übernehmen, CSV- und PDF-Export für die Meldung.</p></div>
+        <div class="cell"><h3>Begehungsscheine</h3><p>Scheine mit Vertrag, Entgelt und Laufzeit je Person, Bezirk und Jagdjahr. Jagende bekommen ihre Rolle über den gültigen Schein, mit Hochsitzen, Dokumenten, Aufgaben und Logbuch.</p></div>
+        <div class="cell"><h3>UVV-Kontrollen</h3><p>Jährliche Kontrolle jeder Einrichtung als Aufgabe am Handy, mit Fotos und Mängeln. Inventar mit Statusfarben und Karte. Gesperrte Stände fallen aus der Jagdplanung.</p></div>
+        <div class="cell"><span class="cell-tag">Push</span><h3>Nachrichten</h3><p>Hinweise an Gäste und Teams mit Lesebestätigung, sofort oder geplant. Ungelesenes wird per E-Mail nachgefasst, Sicherheitsregeln brauchen eine Bestätigung.</p></div>
+        <div class="cell"><h3>Personen &amp; Adressbücher</h3><p>Personen aus CSV, vCard oder einem CardDAV-Adressbuch (Nextcloud, Synology, iCloud). Ein erneuter Abgleich legt keine Doppelten an. Nachweise wie Jagdschein und Schießnachweis mit Ampel.</p></div>
+        <div class="cell"><h3>Ihr Erscheinungsbild</h3><p>Logo, Farben und Briefkopf des Betriebs in App, E-Mails und allen PDFs. Eigener Mail-Absender über das SMTP-Postfach des Betriebs. Die App prüft die Kontraste für hell, dunkel und Dämmerung.</p></div>
+        <div class="cell"><h3>Anleitungen in der App</h3><p>Kurze Touren auf jeder Seite und geführte Abläufe, etwa für Begehungsschein, Bewegungsjagd und Wildbegleitschein. Neue Mitarbeitende finden sich ohne Schulung zurecht.</p></div>
       </div>
 
       <div class="roles">
-        <div class="role"><h3>Zentrale</h3><p>Bezirke, Personen und Rollen pflegen, Revierdaten anbinden, Strecke und Abschussplan auswerten.</p></div>
-        <div class="role"><h3>Revierleitung</h3><p>Jagden planen und einladen, Erlegungen prüfen, Wildbegleitscheine ausstellen.</p></div>
-        <div class="role"><h3>Jägerinnen und Jäger</h3><p>Erlegungen am Handy erfassen, auch offline. Eigene Strecke und Prüfstatus im Blick.</p></div>
-        <div class="role"><h3>Jagdgäste</h3><p>Kein Konto, kein Passwort. Ein persönlicher Link führt zu Einladung, Unterlagen und Rückmeldung.</p></div>
+        <div class="role"><h3>Zentrale</h3><p>Bezirke, Personen und Rollen pflegen, Revierdaten anbinden, Erscheinungsbild und Mailversand einrichten, Strecke und Abschussplan auswerten.</p></div>
+        <div class="role"><h3>Revierleitung</h3><p>Jagden planen und einladen, Erlegungen prüfen, Wildbegleitscheine ausstellen, Begehungsscheine und UVV-Kontrollen verwalten.</p></div>
+        <div class="role"><h3>Jägerinnen und Jäger</h3><p>Erlegungen am Handy erfassen, auch offline. Eigene Strecke, Aufgaben und Prüfstatus im Blick, Karten für den Jagdtag speichern.</p></div>
+        <div class="role"><h3>Jagdgäste</h3><p>Kein Konto, kein Passwort. Ein persönlicher Link führt zu Einladung, Einteilung, Karte, Unterlagen und Rückmeldung.</p></div>
       </div>
     </div>
   </section>
@@ -430,6 +440,8 @@ docker compose up -d
 <span class="c"># optional: Demo-Betrieb einspielen</span>
 docker compose exec api npm run seed:demo</code></pre>
           <ul class="checks">
+            <li>Feste Versionen als Docker-Images, Update mit zwei Befehlen</li>
+            <li>Mehrere Betriebe auf einer Installation, streng getrennt</li>
             <li>Anmeldung per E-Mail-Link, kein Passwort</li>
             <li>Eigener Mailserver über SMTP</li>
             <li>Hinter jedem Reverse-Proxy, Anleitung für Nginx Proxy Manager im README</li>
