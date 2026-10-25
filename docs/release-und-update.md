@@ -13,15 +13,15 @@ Das API-Image enthält kein TypeScript, sondern nur übersetztes JavaScript (ohn
 
 1. Arbeit läuft auf `prototyp` (Feature-Branches werden dorthin gemergt).
 2. Pull Request `prototyp` → `main` im privaten Repository, prüfen, mergen. `main` ist der freigegebene Stand.
-3. Auf `main` einen Tag `v1.2.0` setzen und pushen. Der Workflow `.github/workflows/release.yml`
-   - baut die drei Images und schiebt sie nach `ghcr.io/<konto>/jagd-app-<dienst>` mit den Tags `1.2.0`, `1.2` und `latest`,
+3. Auf `main` einen Tag `v1.3.0` setzen und pushen. Der Workflow `.github/workflows/release.yml`
+   - baut die drei Images und schiebt sie nach `ghcr.io/<konto>/jagd-app-<dienst>` mit den Tags `1.3.0`, `1.3` und `latest`,
    - gleicht Landingpage, Anleitung und README mit dem öffentlichen Repository ab,
-   - legt dort das Release „Jagd-App 1.2.0“ mit Änderungsliste und dem Betriebspaket `jagd-app-1.2.0.tar.gz` (plus `jagd-app.tar.gz` als feste Adresse für „neuestes Release“) an.
+   - legt dort das Release „Jagd-App 1.3.0“ mit Änderungsliste und dem Betriebspaket `jagd-app-1.3.0.tar.gz` (plus `jagd-app.tar.gz` als feste Adresse für „neuestes Release“) an.
 4. Auf dem Server wird nur die Version in `.env` geändert, dann `pull` und `up`.
 
 Zwischen zwei Releases hält `.github/workflows/oeffentlich.yml` Landingpage und Anleitung im öffentlichen Repository aktuell (bei Änderungen an `site/`, `release-repo/` und den beiden Anleitungen auf `main`).
 
-Die Versionsnummer steht allein im Tag. `GET /api/health` meldet sie (`"version": "1.2.0"`, lokal gebaut `"dev"`).
+Die Versionsnummer steht allein im Tag. `GET /api/health` meldet sie (`"version": "1.3.0"`, lokal gebaut `"dev"`).
 
 ## Einmalig auf GitHub einrichten
 
@@ -44,12 +44,12 @@ Voraussetzung: Tests grün, `prototyp` ist über den Pull Request in `main`.
 
 ```sh
 git checkout main && git pull
-git tag -a v1.2.0 -m "Jagd-App 1.2.0"
-git push origin v1.2.0
+git tag -a v1.3.0 -m "Jagd-App 1.3.0"
+git push origin v1.3.0
 ```
 
 - Der Workflow startet automatisch (privates Repository, Reiter *Actions* → „Release“). Dauer: einige Minuten, das Geodaten-Image kompiliert tippecanoe.
-- Fertig ist es, wenn im öffentlichen Repository unter *Releases* „Jagd-App 1.2.0“ steht und die drei Pakete den Tag `1.2.0` haben.
+- Fertig ist es, wenn im öffentlichen Repository unter *Releases* „Jagd-App 1.3.0“ steht und die drei Pakete den Tag `1.3.0` haben.
 - Die Änderungsliste im Release besteht aus den Commit-Titeln, die mit `feat` oder `fix` beginnen. Sprechende Titel zahlen sich hier aus.
 - Fehlerhaftes Release: Den Tag **nicht** wiederverwenden. Release und Tag löschen ist nur sinnvoll, wenn noch kein Server es gezogen hat; sonst die Korrektur als `v1.2.1` veröffentlichen.
 - Nummernschema: Patch (`1.2.1`) für Fehlerkorrekturen, Minor (`1.3.0`) für neue Funktionen, Major (`2.0.0`) für Änderungen, die Betreiber per Hand begleiten müssen.
@@ -81,10 +81,10 @@ Die Datenbank wird beim Start der API automatisch migriert. Migrationen laufen n
 1. **Release-Hinweise lesen** (öffentliches Repository → Releases), besonders neue Pflichtvariablen für `.env`. Neue Vorlagen stehen in `.env.example` des neuen Betriebspakets.
 2. **Sicherung der Datenbank:**
    ```sh
-   docker compose exec -T db pg_dump -U postgres -d jagd | gzip > ~/backups/jagd/db-vor-1.2.0-$(date +%Y%m%d-%H%M).sql.gz
+   docker compose exec -T db pg_dump -U postgres -d jagd | gzip > ~/backups/jagd/db-vor-1.3.0-$(date +%Y%m%d-%H%M).sql.gz
    ```
    Dazu eine Kopie der `.env` und, wenn nötig, des Datenvolumes `jagd_daten` (PDFs, Fotos, Geodaten).
-3. **Version eintragen:** in `.env` `JAGD_VERSION=1.2.0`.
+3. **Version eintragen:** in `.env` `JAGD_VERSION=1.3.0`.
 4. **Ziehen und starten:**
    ```sh
    docker compose pull
@@ -93,7 +93,7 @@ Die Datenbank wird beim Start der API automatisch migriert. Migrationen laufen n
    Compose ersetzt nur Container, deren Image sich geändert hat. Die kurze Unterbrechung dauert, bis die API gesund ist (etwa eine Minute).
 5. **Prüfen:**
    ```sh
-   curl -s https://<ihre-domain>/api/health    # {"ok":true,"db":true,"version":"1.2.0"}
+   curl -s https://<ihre-domain>/api/health    # {"ok":true,"db":true,"version":"1.3.0"}
    docker compose ps                            # alle Dienste „healthy“ bzw. „Up“
    docker compose logs --tail 50 api            # keine Migrationsfehler
    ```
@@ -106,7 +106,7 @@ Die Datenbank wird beim Start der API automatisch migriert. Migrationen laufen n
   ```sh
   docker compose stop api web
   docker compose exec db psql -U postgres -c 'drop database jagd with (force)' -c 'create database jagd owner jagd_owner'
-  gunzip -c ~/backups/jagd/db-vor-1.2.0-….sql.gz | docker compose exec -T db psql -U postgres -d jagd
+  gunzip -c ~/backups/jagd/db-vor-1.3.0-….sql.gz | docker compose exec -T db psql -U postgres -d jagd
   ```
   (Wiederherstellen vorher an einer Kopie üben.)
 
@@ -115,7 +115,7 @@ Die Datenbank wird beim Start der API automatisch migriert. Migrationen laufen n
 - **Brauche ich nach dem Update den Demo-Seed?** Nein. Migrationen bringen Struktur und Standardwerte mit, echte Betriebe bleiben unberührt. Der Seed (`npm run seed:demo`) ist nur für Demo- und Entwicklungsumgebungen und setzt dort den Demo-Mandanten neu auf (löscht und erzeugt ihn, schaltet dabei den Adressbuch-Abgleich für ihn ein). Nie gegen einen Betrieb mit echten Daten starten, ohne zu wissen, dass nur der Demo-Mandant betroffen ist.
 - **Neue Funktionen sichtbar machen:** Manche Funktionen sind je Betrieb ein Betreiberschalter (z. B. Adressbuch-Abgleich im Systemadmin-Bereich) und nach dem Update zunächst aus.
 - **Watchtower:** Läuft auf dem Server bereits Watchtower im Modus `MONITOR_ONLY`, meldet es neue Images per Mail, aktualisiert aber nichts. Das ist hier gewollt: Updates nur bewusst per Anleitung. Wer Watchtower mit Aktualisierung betreibt, sollte `latest` nie verwenden und den Dienst auf Labels beschränken, damit die Datenbank nicht mit hochgezogen wird.
-- **`latest` vs. feste Version:** Im Betrieb immer die feste Version (`1.2.0`) in `.env`. `1.2` folgt Fehlerkorrekturen automatisch, `latest` springt auch über Minor-Versionen und ist nur zum Ausprobieren gedacht.
+- **`latest` vs. feste Version:** Im Betrieb immer die feste Version (`1.3.0`) in `.env`. `1.2` folgt Fehlerkorrekturen automatisch, `latest` springt auch über Minor-Versionen und ist nur zum Ausprobieren gedacht.
 - **Unterschied zum Bauen aus dem Quellcode:** `docker compose up -d --build` (README → Starten) bleibt für Entwicklung und für Server, die direkt aus dem privaten Repository bauen. Beide Wege gleichzeitig auf einem Server zu mischen vermeiden.
 
 ## Technische Notizen
