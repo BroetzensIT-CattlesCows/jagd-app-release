@@ -1,6 +1,6 @@
-# Jagd-App – Releases
+# Hunts – Releases
 
-Die Jagd-App plant Bewegungsjagden über die ganze Saison: Revierdaten, Einladungen, Zusagen und Strecke an einem Ort. Dieses Repository enthält die **fertigen Releases** und die Betriebsanleitung. Der Quellcode wird in einem privaten Repository entwickelt.
+Hunts plant Bewegungsjagden über die ganze Saison: Revierdaten, Einladungen, Zusagen und Strecke an einem Ort. Dieses Repository enthält die **fertigen Releases** und die Betriebsanleitung. Der Quellcode wird in einem privaten Repository entwickelt.
 
 - Landingpage: <https://broetzensit-cattlescows.github.io/jagd-app-release/>
 - **Aktuelles Release:** [Releases](../../releases/latest) (Betriebspaket `jagd-app.tar.gz`)

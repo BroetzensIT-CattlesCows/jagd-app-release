@@ -1,6 +1,6 @@
 # Release und Update über ghcr.io
 
-Die Jagd-App wird als drei fertige Images in der GitHub Container Registry veröffentlicht: `jagd-app-api`, `jagd-app-web`, `jagd-app-geodaten`. Datenbank (`postgis/postgis`), Mailpit und Alpine kommen unverändert von Docker Hub. Alle drei Images eines Releases tragen dieselbe Versionsnummer.
+Hunts wird als drei fertige Images in der GitHub Container Registry veröffentlicht: `jagd-app-api`, `jagd-app-web`, `jagd-app-geodaten`. Datenbank (`postgis/postgis`), Mailpit und Alpine kommen unverändert von Docker Hub. Alle drei Images eines Releases tragen dieselbe Versionsnummer.
 
 Der Quellcode liegt in einem **privaten** Repository (`jagd-app`). Öffentlich sind nur:
 
@@ -16,7 +16,7 @@ Das API-Image enthält kein TypeScript, sondern nur übersetztes JavaScript (ohn
 3. Auf `main` einen Tag `v1.3.0` setzen und pushen. Der Workflow `.github/workflows/release.yml`
    - baut die drei Images und schiebt sie nach `ghcr.io/<konto>/jagd-app-<dienst>` mit den Tags `1.3.0`, `1.3` und `latest`,
    - gleicht Landingpage, Anleitung und README mit dem öffentlichen Repository ab,
-   - legt dort das Release „Jagd-App 1.3.0“ mit Änderungsliste und dem Betriebspaket `jagd-app-1.3.0.tar.gz` (plus `jagd-app.tar.gz` als feste Adresse für „neuestes Release“) an.
+   - legt dort das Release „Hunts 1.3.0“ mit Änderungsliste und dem Betriebspaket `jagd-app-1.3.0.tar.gz` (plus `jagd-app.tar.gz` als feste Adresse für „neuestes Release“) an.
 4. Auf dem Server wird nur die Version in `.env` geändert, dann `pull` und `up`.
 
 Zwischen zwei Releases hält `.github/workflows/oeffentlich.yml` Landingpage und Anleitung im öffentlichen Repository aktuell (bei Änderungen an `site/`, `release-repo/` und den beiden Anleitungen auf `main`).
@@ -44,12 +44,12 @@ Voraussetzung: Tests grün, `prototyp` ist über den Pull Request in `main`.
 
 ```sh
 git checkout main && git pull
-git tag -a v1.3.0 -m "Jagd-App 1.3.0"
+git tag -a v1.3.0 -m "Hunts 1.3.0"
 git push origin v1.3.0
 ```
 
 - Der Workflow startet automatisch (privates Repository, Reiter *Actions* → „Release“). Dauer: einige Minuten, das Geodaten-Image kompiliert tippecanoe.
-- Fertig ist es, wenn im öffentlichen Repository unter *Releases* „Jagd-App 1.3.0“ steht und die drei Pakete den Tag `1.3.0` haben.
+- Fertig ist es, wenn im öffentlichen Repository unter *Releases* „Hunts 1.3.0“ steht und die drei Pakete den Tag `1.3.0` haben.
 - Die Änderungsliste im Release besteht aus den Commit-Titeln, die mit `feat` oder `fix` beginnen. Sprechende Titel zahlen sich hier aus.
 - Fehlerhaftes Release: Den Tag **nicht** wiederverwenden. Release und Tag löschen ist nur sinnvoll, wenn noch kein Server es gezogen hat; sonst die Korrektur als `v1.2.1` veröffentlichen.
 - Nummernschema: Patch (`1.2.1`) für Fehlerkorrekturen, Minor (`1.3.0`) für neue Funktionen, Major (`2.0.0`) für Änderungen, die Betreiber per Hand begleiten müssen.
